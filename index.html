@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Library</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+  :root {
+    --bg: #131313;
+    --surface: #212121;
+    --surface2: #2a2a2a;
+    --surface3: #333333;
+    --accent: #ff810a;
+    --accent-dim: rgba(255,129,10,0.15);
+    --accent-glow: rgba(255,129,10,0.4);
+    --text: #e0e0e0;
+    --text-dim: #888;
+    --text-muted: #555;
+    --green: #4caf50;
+    --red: #e53935;
+    --yellow: #ffca28;
+    --border: rgba(255,255,255,0.07);
+    --radius: 10px;
+    --transition: 0.2s ease;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { font-size: 16px; scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(180deg, #1a1a1a 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .logo-icon svg { width: 20px; height: 20px; fill: #fff; }
+
+  h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #fff;
+    line-height: 1;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .game-count {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .game-count strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Search */
+  .search-bar {
+    position: relative;
+  }
+
+  .search-bar input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px 10px 40px;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    outline: none;
+  }
+
+  .search-bar input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  .search-bar input::placeholder { color: var(--text-muted); }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+  }
+
+  /* Filters */
+  .filters-section {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+  }
+
+  .filters-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--text);
+  }
+
+  .filters-toggle:hover { color: var(--accent); }
+
+  .filters-toggle .arrow {
+    margin-left: auto;
+    transition: transform 0.2s;
+    color: var(--text-dim);
+  }
+
+  .filters-toggle.open .arrow { transform: rotate(180deg); }
+
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+    margin-top: 14px;
+    display: none;
+  }
+
+  .filters-grid.open { display: grid; }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .filter-group label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+
+  .filter-group select, .filter-group input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    outline: none;
+    transition: border-color var(--transition);
+    min-height: 38px;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .filter-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+  }
+
+  .filter-group select:focus, .filter-group input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-dim);
+  }
+
+  .sort-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .sort-bar label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  .sort-bar select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 28px 7px 10px;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    outline: none;
+    min-height: 36px;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    transition: border-color var(--transition);
+    flex: 1;
+    max-width: 200px;
+  }
+
+  .sort-bar select:focus { border-color: var(--accent); }
+
+  .sort-dir-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    min-height: 36px;
+    min-width: 44px;
+    transition: background var(--transition), border-color var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sort-dir-btn:hover { background: var(--surface3); border-color: var(--accent); }
+
+  .clear-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    min-height: 36px;
+    font-family: 'DM Sans', sans-serif;
+    transition: all var(--transition);
+    margin-left: auto;
+  }
+
+  .clear-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Main */
+  main {
+    padding: 20px 24px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* View toggle */
+  .view-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .view-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    min-height: 36px;
+    min-width: 36px;
+  }
+
+  .view-btn:hover, .view-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .results-info {
+    margin-left: auto;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+  }
+
+  /* Grid View */
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .game-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    cursor: pointer;
+    position: relative;
+  }
+
+  .game-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    border-color: rgba(255,129,10,0.3);
+  }
+
+  .card-image {
+    width: 100%;
+    aspect-ratio: 2/3;
+    object-fit: cover;
+    display: block;
+    background: var(--surface2);
+  }
+
+  .card-image-fallback {
+    width: 100%;
+    aspect-ratio: 2/3;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    text-align: center;
+    padding: 12px;
+  }
+
+  .card-image-fallback svg { opacity: 0.3; }
+
+  .card-body {
+    padding: 10px 12px 12px;
+  }
+
+  .card-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.2;
+    color: #fff;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .tag {
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    border-radius: 3px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+
+  .tag-platform { background: rgba(100,130,220,0.2); color: #8aa4f5; }
+  .tag-multi { background: rgba(150,100,220,0.2); color: #c8a0f5; }
+
+  .card-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .install-badge {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .badge-installed { background: rgba(76,175,80,0.2); color: var(--green); }
+  .badge-not-installed { background: rgba(229,57,53,0.2); color: var(--red); }
+  .badge-not-needed { background: rgba(136,136,136,0.2); color: var(--text-dim); }
+
+  .card-image-wrapper {
+    position: relative;
+  }
+
+  .size-badge-overlay {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 7px;
+    border-radius: 20px;
+    background: rgba(19,19,19,0.82);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.1);
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+  }
+
+  .enjoyment-num-badge {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    margin-left: auto;
+  }
+
+  /* List View */
+  .games-list { display: none; }
+  .games-list.active { display: block; }
+  .games-grid.active { display: grid; }
+  .games-grid:not(.active) { display: none; }
+
+  .list-header {
+    display: grid;
+    grid-template-columns: 48px 1fr 100px 120px 80px 70px 80px 80px;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px 8px 0 0;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+
+  .list-header .col-sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: color var(--transition);
+  }
+
+  .list-header .col-sortable:hover { color: var(--accent); }
+
+  .list-row {
+    display: grid;
+    grid-template-columns: 48px 1fr 100px 120px 80px 70px 80px 80px;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-top: none;
+    transition: background var(--transition);
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .list-row:hover { background: var(--surface2); }
+  .list-row:last-child { border-radius: 0 0 8px 8px; }
+
+  .list-thumb {
+    width: 36px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+    background: var(--surface2);
+    flex-shrink: 0;
+  }
+
+  .list-thumb-fallback {
+    width: 36px;
+    height: 48px;
+    background: var(--surface2);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .list-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .list-cell {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.15s ease;
+  }
+
+  .modal-backdrop.open { display: flex; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid rgba(255,129,10,0.2);
+    border-radius: 14px;
+    max-width: 680px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.2s ease;
+  }
+
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  .modal-header {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-img {
+    width: 100px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+    background: var(--surface2);
+  }
+
+  .modal-img-fallback {
+    width: 100px;
+    height: 150px;
+    background: var(--surface2);
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+  }
+
+  .modal-title-area { flex: 1; min-width: 0; }
+
+  .modal-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .detail-item {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+
+  .detail-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .detail-value {
+    font-size: 0.9rem;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .detail-full {
+    grid-column: 1 / -1;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+  }
+
+  .modal-close:hover { background: var(--surface3); border-color: var(--accent); }
+
+  .modal { position: relative; }
+
+  /* Enjoyment display */
+  .enjoyment-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .enjoyment-track {
+    flex: 1;
+    height: 4px;
+    background: var(--surface3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .enjoyment-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .enjoyment-num {
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 700;
+    min-width: 28px;
+    text-align: right;
+  }
+
+  /* Notes */
+  .notes-box {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-top: 12px;
+  }
+
+  /* No results */
+  .no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+  }
+
+  .no-results svg { opacity: 0.2; margin-bottom: 16px; }
+  .no-results h3 { font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; color: var(--text); margin-bottom: 6px; }
+
+  /* Active filters display */
+  .active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .active-filter-chip {
+    background: var(--accent-dim);
+    border: 1px solid rgba(255,129,10,0.3);
+    color: var(--accent);
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .active-filter-chip:hover { background: rgba(255,129,10,0.25); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    header { padding: 14px 16px 12px; }
+    main { padding: 14px 16px; }
+    .filters-section { padding: 12px 16px; }
+
+    .games-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+
+    .list-header, .list-row {
+      grid-template-columns: 36px 1fr 70px 80px;
+    }
+
+    .list-header .col-multi,
+    .list-header .col-players,
+    .list-header .col-size,
+    .list-row .cell-multi,
+    .list-row .cell-players,
+    .list-row .cell-size { display: none; }
+
+    .detail-grid { grid-template-columns: 1fr; }
+
+    .modal-header { flex-direction: column; align-items: center; text-align: center; }
+    .modal-img, .modal-img-fallback { width: 80px; height: 120px; }
+  }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 1.2rem; }
+    .games-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+    .filters-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M21 6H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1zm-10 7H8v3H6v-3H3V11h3V8h2v3h3v2zm4.5 2c-.83 0-1.5-.67-1.5-1.5S14.67 12 15.5 12s1.5.67 1.5 1.5S16.33 15 15.5 15zm3-3c-.83 0-1.5-.67-1.5-1.5S17.67 10 18.5 10s1.5.67 1.5 1.5S19.33 12 18.5 12z"/></svg>
+    </div>
+    <h1>GAME <span>LIBRARY</span></h1>
+    <div class="game-count" id="gameCount"><strong>0</strong> games</div>
+  </div>
+  <div class="search-bar">
+    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    <input type="text" id="searchInput" placeholder="Search games by title, platform, player…" autocomplete="off">
+  </div>
+</header>
+
+<div class="filters-section">
+  <button class="filters-toggle" id="filtersToggle">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
+    Filters &amp; Sort
+    <svg class="arrow" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+  </button>
+  <div class="filters-grid" id="filtersGrid">
+    <div class="filter-group">
+      <label>Ownership</label>
+      <select id="filterOwner"><option value="">All</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Multiplayer</label>
+      <select id="filterMulti"><option value="">All</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Platform</label>
+      <select id="filterPlatform"><option value="">All</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Install Status</label>
+      <select id="filterInstall">
+        <option value="">All</option>
+        <option value="Installed">Installed</option>
+        <option value="Not Installed">Not Installed</option>
+        <option value="Install Not Needed">Install Not Needed</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Min Enjoyment</label>
+      <input type="number" id="filterEnjoyMin" placeholder="0" min="0" max="10" style="appearance:textfield">
+    </div>
+    <div class="filter-group">
+      <label>Max Enjoyment</label>
+      <input type="number" id="filterEnjoyMax" placeholder="10" min="0" max="10" style="appearance:textfield">
+    </div>
+    <div class="filter-group">
+      <label>Player</label>
+      <select id="filterPlayer"><option value="">All</option></select>
+    </div>
+    <div class="filter-group">
+      <label>Max Size (GB)</label>
+      <input type="number" id="filterSizeMax" placeholder="Any" min="0" style="appearance:textfield">
+    </div>
+  </div>
+  <div class="sort-bar">
+    <label>Sort:</label>
+    <select id="sortBy">
+      <option value="title">Title</option>
+      <option value="enjoyment">Enjoyment</option>
+      <option value="size">Size</option>
+      <option value="status">Install Status</option>
+    </select>
+    <button class="sort-dir-btn" id="sortDirBtn" title="Toggle direction">↑</button>
+    <button class="clear-btn" id="clearFilters">Clear All</button>
+  </div>
+  <div class="active-filters" id="activeFilters"></div>
+</div>
+
+<main>
+  <div class="view-bar">
+    <button class="view-btn active" id="gridViewBtn" title="Grid view">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h7v7H3zm0 11h7v7H3zm11-11h7v7h-7zm0 11h7v7h-7z"/></svg>
+    </button>
+    <button class="view-btn" id="listViewBtn" title="List view">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+    </button>
+    <span class="results-info" id="resultsInfo"></span>
+  </div>
+
+  <div class="games-grid active" id="gamesGrid"></div>
+
+  <div class="games-list" id="gamesList">
+    <div class="list-header">
+      <div></div>
+      <div class="col-sortable" data-sort="title">Title</div>
+      <div class="col-sortable col-multi" data-sort="multi">Multiplayer</div>
+      <div class="col-sortable" data-sort="platform">Platform(s)</div>
+      <div class="col-sortable col-players col-size" data-sort="size">Size</div>
+      <div class="col-sortable" data-sort="enjoyment">Enjoy</div>
+      <div class="col-sortable" data-sort="status">Status</div>
+      <div class="col-sortable" data-sort="owner">Owner</div>
+    </div>
+    <div id="listBody"></div>
+  </div>
+
+  <div class="no-results" id="noResults" style="display:none;">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    <h3>No Games Found</h3>
+    <p>Try adjusting your filters or search query.</p>
+  </div>
+</main>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-header" id="modalHeader"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ── CSV Parser (single-pass, handles quoted commas & multiline fields) ───────
+function parseCSV(text) {
+  const raw = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const headers = [];
+  const rows = [];
+  let fields = [], cur = '', inQ = false, headerDone = false;
+
+  const commitField = () => { fields.push(cur); cur = ''; };
+  const commitRow = () => {
+    commitField();
+    if (!headerDone) {
+      headers.push(...fields.map(h => h.trim()));
+      headerDone = true;
+    } else if (fields.some(f => f.trim())) {
+      const obj = {};
+      headers.forEach((h, i) => obj[h] = (fields[i] || '').trim());
+      rows.push(obj);
+    }
+    fields = [];
+  };
+
+  for (let i = 0; i <= raw.length; i++) {
+    const c = raw[i];
+    if (i === raw.length) { commitRow(); break; }
+    if (c === '"') {
+      if (inQ && raw[i + 1] === '"') { cur += '"'; i++; }
+      else inQ = !inQ;
+    } else if (c === ',' && !inQ) {
+      commitField();
+    } else if (c === '\n' && !inQ) {
+      commitRow();
+    } else {
+      cur += c;
+    }
+  }
+  return rows;
+}
+
+// ── Size colour ─────────────────────────────────────────────────────────────
+function getSizeColor(gb) {
+  if (!gb || gb === 'N/A' || isNaN(parseFloat(gb))) return null;
+  const v = parseFloat(gb);
+  if (v <= 0) return '#4caf50';
+  if (v <= 5) {
+    const t = v / 5;
+    return lerpColor('#4caf50', '#ffca28', t);
+  } else if (v <= 30) {
+    const t = (v - 5) / 25;
+    return lerpColor('#ffca28', '#ff9800', t);
+  } else {
+    const t = Math.min((v - 30) / 30, 1);
+    return lerpColor('#ff9800', '#e53935', t);
+  }
+}
+
+function getEnjoyColor(val) {
+  const t = Math.max(0, Math.min(10, val)) / 10;
+  if (t <= 0.5) return lerpColor('#e53935', '#ffca28', t * 2);
+  return lerpColor('#ffca28', '#4caf50', (t - 0.5) * 2);
+}
+
+function lerpColor(a, b, t) {
+  const ra = parseInt(a.slice(1,3),16), ga = parseInt(a.slice(3,5),16), ba = parseInt(a.slice(5,7),16);
+  const rb = parseInt(b.slice(1,3),16), gb2 = parseInt(b.slice(3,5),16), bb = parseInt(b.slice(5,7),16);
+  const r = Math.round(ra + (rb-ra)*t);
+  const g = Math.round(ga + (gb2-ga)*t);
+  const bl = Math.round(ba + (bb-ba)*t);
+  return `rgb(${r},${g},${bl})`;
+}
+
+// ── Format ──────────────────────────────────────────────────────────────────
+function fmtSize(gb) {
+  if (!gb || gb === 'N/A' || gb === '') return null;
+  const v = parseFloat(gb);
+  if (isNaN(v)) return null;
+  if (v === Math.floor(v)) return v + ' GB';
+  const r = Math.round(v * 100) / 100;
+  const s = r.toString();
+  const dec = s.includes('.') ? s.split('.')[1] : '';
+  if (dec.length <= 1) return r.toFixed(1) + ' GB';
+  if (dec.length === 2) return r.toFixed(2) + ' GB';
+  return r.toFixed(2) + ' GB';
+}
+
+function installClass(status) {
+  if (!status) return 'badge-not-installed';
+  const s = status.toLowerCase();
+  if (s.includes('not needed')) return 'badge-not-needed';
+  if (s.includes('not')) return 'badge-not-installed';
+  if (s.includes('install')) return 'badge-installed';
+  return 'badge-not-installed';
+}
+
+function installText(status) {
+  if (!status) return 'Unknown';
+  if (status.toLowerCase().includes('not needed')) return 'N/A';
+  if (status.toLowerCase().includes('not')) return 'Not Installed';
+  if (status.toLowerCase().includes('install')) return 'Installed';
+  return status;
+}
+
+// ── Extract image from possible HTML string ──────────────────────────────────
+function extractImageUrl(raw) {
+  if (!raw) return null;
+  if (raw.startsWith('<')) {
+    const m = raw.match(/src=["']([^"']+)["']/);
+    return m ? m[1] : null;
+  }
+  if (raw.startsWith('http')) return raw;
+  return null;
+}
+
+// ── App State ────────────────────────────────────────────────────────────────
+let allGames = [];
+let filtered = [];
+let sortField = 'title';
+let sortDir = 1; // 1=asc, -1=desc
+let viewMode = 'grid';
+
+// ── Load CSV ─────────────────────────────────────────────────────────────────
+async function loadGames() {
+  try {
+    const r = await fetch('games.csv');
+    if (!r.ok) throw new Error('not found');
+    const text = await r.text();
+    allGames = parseCSV(text).filter(g => g['Game'] && g['Game'].trim());
+  } catch(e) {
+    // Use sample data if CSV not found
+    allGames = getSampleData();
+  }
+  populateFilters();
+  applyFilters();
+}
+
+function getSampleData() {
+  return [
+    { Game: '4 Souls', Ownership: 'Kay', Multiplayer: 'Local Multiplayer', 'Player(s)': 'Kay,Dee,Gary,Martin', 'Platform(s)': 'Board Game', 'Size (GB)': 'Med', 'Steam ID': 'N/A', 'Game Image': 'https://i.kickstarter.com/assets/021/662/180/97e5c249dee6b4488b268f9b5ba454cf_original.png?anim=false&fit=cover&gravity=auto&height=873&origin=ugc&q=92&v=1529970458&width=1552&sig=rfeWYjrfsKf4FDW3LYcI4pA%2BZDJIdI2MFCbe9OGnQeE%3D', Enjoyment: '9', Notes: 'Stored in games room.', 'Install Status': 'Install Not Needed', 'Last Installed/Uninstalled': 'N/A' },
+    { Game: '7 Billion Humans', Ownership: 'Kay', Multiplayer: 'Single-Player', 'Player(s)': 'Kay', 'Platform(s)': 'Steam', 'Size (GB)': '0.26', 'Steam ID': '792100', 'Game Image': 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/792100/library_600x900.jpg', Enjoyment: '8', Notes: '', 'Install Status': 'Installed', 'Last Installed/Uninstalled': '9/21/2024, 7:29 AM' },
+    { Game: '80 Days', Ownership: 'Kay', Multiplayer: 'Single-Player', 'Player(s)': 'Kay', 'Platform(s)': 'Steam', 'Size (GB)': '1.07', 'Steam ID': '381780', 'Game Image': 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/381780/library_600x900.jpg', Enjoyment: '6', Notes: '', 'Install Status': 'Not Installed', 'Last Installed/Uninstalled': '9/21/2024, 7:29 AM' },
+    { Game: '888 Poker', Ownership: 'Kay', Multiplayer: 'Online PvP', 'Player(s)': 'Kay', 'Platform(s)': 'PC,Web Browser', 'Size (GB)': '', 'Steam ID': 'N/A', 'Game Image': 'https://www.pngkey.com/png/detail/138-1389406_888-poker-logo-png.png', Enjoyment: '6', Notes: '', 'Install Status': 'Not Installed', 'Last Installed/Uninstalled': '9/21/2024, 7:29 AM' },
+    { Game: 'Apex Legends', Ownership: 'Kay,Dee,Martin,Gary', Multiplayer: 'Online PvP', 'Player(s)': 'Kay,Dee', 'Platform(s)': 'Playstation,Epic Games', 'Size (GB)': '68.66', 'Steam ID': '1172470', 'Game Image': 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1172470/library_600x900.jpg', Enjoyment: '6', Notes: '', 'Install Status': 'Not Installed', 'Last Installed/Uninstalled': '9/21/2024, 7:47 AM' },
+    { Game: 'Battleblock Theatre', Ownership: 'Kay', Multiplayer: 'Single-Player,Online PvP,Online Co-Op,Local Multiplayer', 'Player(s)': 'Kay', 'Platform(s)': 'Steam', 'Size (GB)': '0.09', 'Steam ID': '238460', 'Game Image': 'https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/238460/library_600x900.jpg', Enjoyment: '7', Notes: '', 'Install Status': 'Installed', 'Last Installed/Uninstalled': '9/21/2024, 7:29 AM' },
+  ];
+}
+
+// ── Populate filter dropdowns ─────────────────────────────────────────────────
+function populateFilters() {
+  const owners = new Set(), multis = new Set(), platforms = new Set(), players = new Set();
+  allGames.forEach(g => {
+    if (g.Ownership) g.Ownership.split(',').forEach(o => owners.add(o.trim()));
+    if (g.Multiplayer) g.Multiplayer.split(',').forEach(m => multis.add(m.trim()));
+    if (g['Platform(s)']) g['Platform(s)'].split(',').forEach(p => platforms.add(p.trim()));
+    if (g['Player(s)']) g['Player(s)'].split(',').forEach(p => players.add(p.trim()));
+  });
+
+  populateSelect('filterOwner', [...owners].sort());
+  populateSelect('filterMulti', [...multis].sort());
+  populateSelect('filterPlatform', [...platforms].sort());
+  populateSelect('filterPlayer', [...players].sort());
+}
+
+function populateSelect(id, opts) {
+  const sel = document.getElementById(id);
+  const existing = sel.value;
+  opts.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o;
+    opt.textContent = o;
+    sel.appendChild(opt);
+  });
+  if (existing) sel.value = existing;
+}
+
+// ── Filter & Sort ────────────────────────────────────────────────────────────
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const owner = document.getElementById('filterOwner').value;
+  const multi = document.getElementById('filterMulti').value;
+  const platform = document.getElementById('filterPlatform').value;
+  const install = document.getElementById('filterInstall').value;
+  const enjoyMin = parseFloat(document.getElementById('filterEnjoyMin').value) || 0;
+  const enjoyMax = parseFloat(document.getElementById('filterEnjoyMax').value) || 10;
+  const sizeMax = parseFloat(document.getElementById('filterSizeMax').value);
+  const player = document.getElementById('filterPlayer').value;
+
+  filtered = allGames.filter(g => {
+    if (search) {
+      const haystack = [g.Game, g['Platform(s)'], g['Player(s)'], g.Ownership, g.Multiplayer, g.Notes].join(' ').toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+    if (owner && !g.Ownership.split(',').map(o=>o.trim()).includes(owner)) return false;
+    if (multi && !g.Multiplayer.split(',').map(m=>m.trim()).includes(multi)) return false;
+    if (platform && !g['Platform(s)'].split(',').map(p=>p.trim()).includes(platform)) return false;
+    if (install && g['Install Status'] !== install) return false;
+    const enjoy = parseFloat(g.Enjoyment);
+    if (!isNaN(enjoy)) {
+      if (enjoy < enjoyMin || enjoy > enjoyMax) return false;
+    }
+    if (!isNaN(sizeMax)) {
+      const sz = parseFloat(g['Size (GB)']);
+      if (!isNaN(sz) && sz > sizeMax) return false;
+    }
+    if (player && !g['Player(s)'].split(',').map(p=>p.trim()).includes(player)) return false;
+    return true;
+  });
+
+  // Sort
+  filtered.sort((a, b) => {
+    let va, vb;
+    switch(sortField) {
+      case 'title': va = a.Game.toLowerCase(); vb = b.Game.toLowerCase(); break;
+      case 'enjoyment': va = parseFloat(a.Enjoyment) || 0; vb = parseFloat(b.Enjoyment) || 0; break;
+      case 'size': va = parseFloat(a['Size (GB)']) || 0; vb = parseFloat(b['Size (GB)']) || 0; break;
+      case 'status': va = a['Install Status'] || ''; vb = b['Install Status'] || ''; break;
+      default: va = a.Game.toLowerCase(); vb = b.Game.toLowerCase();
+    }
+    if (va < vb) return -sortDir;
+    if (va > vb) return sortDir;
+    return 0;
+  });
+
+  updateActiveFilters();
+  renderAll();
+}
+
+function updateActiveFilters() {
+  const chips = [];
+  const owner = document.getElementById('filterOwner').value;
+  const multi = document.getElementById('filterMulti').value;
+  const platform = document.getElementById('filterPlatform').value;
+  const install = document.getElementById('filterInstall').value;
+  const enjoyMin = document.getElementById('filterEnjoyMin').value;
+  const enjoyMax = document.getElementById('filterEnjoyMax').value;
+  const sizeMax = document.getElementById('filterSizeMax').value;
+  const player = document.getElementById('filterPlayer').value;
+  const search = document.getElementById('searchInput').value;
+
+  if (owner) chips.push({label: `Owner: ${owner}`, clear: ()=>{ document.getElementById('filterOwner').value=''; applyFilters(); }});
+  if (multi) chips.push({label: `Mode: ${multi}`, clear: ()=>{ document.getElementById('filterMulti').value=''; applyFilters(); }});
+  if (platform) chips.push({label: `Platform: ${platform}`, clear: ()=>{ document.getElementById('filterPlatform').value=''; applyFilters(); }});
+  if (install) chips.push({label: `Status: ${install}`, clear: ()=>{ document.getElementById('filterInstall').value=''; applyFilters(); }});
+  if (enjoyMin) chips.push({label: `Min Enjoy: ${enjoyMin}`, clear: ()=>{ document.getElementById('filterEnjoyMin').value=''; applyFilters(); }});
+  if (enjoyMax && enjoyMax != '10') chips.push({label: `Max Enjoy: ${enjoyMax}`, clear: ()=>{ document.getElementById('filterEnjoyMax').value=''; applyFilters(); }});
+  if (sizeMax) chips.push({label: `Max Size: ${sizeMax}GB`, clear: ()=>{ document.getElementById('filterSizeMax').value=''; applyFilters(); }});
+  if (player) chips.push({label: `Player: ${player}`, clear: ()=>{ document.getElementById('filterPlayer').value=''; applyFilters(); }});
+  if (search) chips.push({label: `"${search}"`, clear: ()=>{ document.getElementById('searchInput').value=''; applyFilters(); }});
+
+  const af = document.getElementById('activeFilters');
+  af.innerHTML = '';
+  chips.forEach(c => {
+    const chip = document.createElement('div');
+    chip.className = 'active-filter-chip';
+    chip.innerHTML = c.label + ' <span>✕</span>';
+    chip.addEventListener('click', c.clear);
+    af.appendChild(chip);
+  });
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function renderAll() {
+  document.getElementById('gameCount').innerHTML = `<strong>${allGames.length}</strong> game${allGames.length !== 1 ? 's' : ''}`;
+  document.getElementById('resultsInfo').textContent = `${filtered.length} of ${allGames.length} shown`;
+
+  if (filtered.length === 0) {
+    document.getElementById('noResults').style.display = 'block';
+    document.getElementById('gamesGrid').innerHTML = '';
+    document.getElementById('listBody').innerHTML = '';
+    return;
+  }
+  document.getElementById('noResults').style.display = 'none';
+
+  renderGrid();
+  renderList();
+}
+
+function getImg(g) {
+  let url = extractImageUrl(g['Game Image']);
+  if (!url) return null;
+
+  // Replace [Steam ID] placeholder with actual Steam ID column value
+  if (url.includes('[Steam ID]')) {
+    const id = g['Steam ID'] && g['Steam ID'] !== 'N/A' ? g['Steam ID'].trim() : '';
+    if (!id) return null;
+    url = url.replace('[Steam ID]', id);
+  }
+
+  // Cloudflare steamstatic URLs with an empty Steam ID segment (.../apps//...)
+  // — fill from Steam ID column if available, otherwise discard
+  if (/\/apps\/\//.test(url)) {
+    const id = g['Steam ID'] && g['Steam ID'] !== 'N/A' ? g['Steam ID'].trim() : '';
+    if (!id) return null;
+    url = url.replace('/apps//', '/apps/' + id + '/');
+  }
+
+  return url;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('gamesGrid');
+  grid.innerHTML = '';
+  filtered.forEach(g => {
+    const card = document.createElement('div');
+    card.className = 'game-card';
+    card.addEventListener('click', () => openModal(g));
+
+    const imgUrl = getImg(g);
+    const enjoy = parseFloat(g.Enjoyment);
+    const sizeGb = parseFloat(g['Size (GB)']);
+    const sizeColor = getSizeColor(sizeGb);
+    const sizeFormatted = fmtSize(g['Size (GB)']);
+    const platforms = (g['Platform(s)'] || '').split(',').map(p=>p.trim()).filter(Boolean);
+    const multiModes = (g.Multiplayer || '').split(',').map(m=>m.trim()).filter(Boolean);
+
+    let imgHtml = '';
+    if (imgUrl) {
+      imgHtml = `<img class="card-image" src="${imgUrl}" alt="${g.Game}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="card-image-fallback" style="display:none;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M21 6H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1z" opacity=".5"/></svg>
+          ${g.Game}
+        </div>`;
+    } else {
+      imgHtml = `<div class="card-image-fallback">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M21 6H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1z" opacity=".5"/></svg>
+        ${g.Game}
+      </div>`;
+    }
+
+    let tagsHtml = '';
+    if (platforms.length) tagsHtml += `<span class="tag tag-platform">${platforms[0]}${platforms.length > 1 ? ' +' + (platforms.length-1) : ''}</span>`;
+    if (multiModes.length) tagsHtml += `<span class="tag tag-multi">${multiModes[0]}${multiModes.length > 1 ? ' +' + (multiModes.length-1) : ''}</span>`;
+
+    const enjoyColor = !isNaN(enjoy) ? getEnjoyColor(enjoy) : null;
+    const enjoyBadge = !isNaN(enjoy)
+      ? `<span class="enjoyment-num-badge" style="color:${enjoyColor}">${enjoy}</span>`
+      : '';
+
+    const sizeOverlay = sizeFormatted && sizeColor
+      ? `<span class="size-badge-overlay" style="color:${sizeColor}">${sizeFormatted}</span>`
+      : '';
+
+    card.innerHTML = `
+      <div class="card-image-wrapper">
+        ${imgHtml}
+        ${sizeOverlay}
+      </div>
+      <div class="card-body">
+        <div class="card-title">${g.Game}</div>
+        <div class="card-tags">${tagsHtml}</div>
+        <div class="card-stats">
+          <span class="install-badge ${installClass(g['Install Status'])}">${installText(g['Install Status'])}</span>
+          ${enjoyBadge}
+        </div>
+      </div>`;
+
+    grid.appendChild(card);
+  });
+}
+
+function renderList() {
+  const body = document.getElementById('listBody');
+  body.innerHTML = '';
+  filtered.forEach(g => {
+    const row = document.createElement('div');
+    row.className = 'list-row';
+    row.addEventListener('click', () => openModal(g));
+
+    const imgUrl = getImg(g);
+    const sizeGb = parseFloat(g['Size (GB)']);
+    const sizeColor = getSizeColor(sizeGb);
+    const sizeFormatted = fmtSize(g['Size (GB)']);
+    const enjoy = parseFloat(g.Enjoyment);
+    const platforms = (g['Platform(s)'] || '').split(',').map(p=>p.trim()).filter(Boolean).join(', ');
+
+    let thumb = '';
+    if (imgUrl) {
+      thumb = `<img class="list-thumb" src="${imgUrl}" alt="${g.Game}" loading="lazy" onerror="this.style.display='none';this.parentElement.querySelector('.list-thumb-fallback').style.display='flex';">
+        <div class="list-thumb-fallback" style="display:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity=".4"><path d="M21 6H3v12h18z"/></svg></div>`;
+    } else {
+      thumb = `<div class="list-thumb-fallback"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" opacity=".4"><path d="M21 6H3v12h18z"/></svg></div>`;
+    }
+
+    row.innerHTML = `
+      <div>${thumb}</div>
+      <div class="list-title">${g.Game}</div>
+      <div class="list-cell col-multi cell-multi">${g.Multiplayer || '—'}</div>
+      <div class="list-cell">${platforms || '—'}</div>
+      <div class="list-cell col-size cell-size" style="color:${sizeColor||'var(--text-dim)'}">${sizeFormatted || '—'}</div>
+      <div class="list-cell" style="color:${!isNaN(enjoy) ? 'var(--accent)' : 'var(--text-dim)'}">${!isNaN(enjoy) ? enjoy : '—'}/10</div>
+      <div class="list-cell"><span class="install-badge ${installClass(g['Install Status'])}">${installText(g['Install Status'])}</span></div>
+      <div class="list-cell">${g.Ownership || '—'}</div>`;
+
+    body.appendChild(row);
+  });
+}
+
+// ── Modal ────────────────────────────────────────────────────────────────────
+function openModal(g) {
+  const imgUrl = getImg(g);
+  const enjoy = parseFloat(g.Enjoyment);
+  const sizeColor = getSizeColor(parseFloat(g['Size (GB)']));
+  const sizeFormatted = fmtSize(g['Size (GB)']);
+
+  let imgHtml = '';
+  if (imgUrl) {
+    imgHtml = `<img class="modal-img" src="${imgUrl}" alt="${g.Game}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+      <div class="modal-img-fallback" style="display:none;"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" opacity=".3"><path d="M21 6H3v12h18z"/></svg></div>`;
+  } else {
+    imgHtml = `<div class="modal-img-fallback"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" opacity=".3"><path d="M21 6H3v12h18z"/></svg></div>`;
+  }
+
+  document.getElementById('modalHeader').innerHTML = `
+    ${imgHtml}
+    <div class="modal-title-area">
+      <div class="modal-title">${g.Game}</div>
+      <div class="card-tags" style="margin-bottom:8px;">
+        ${(g['Platform(s)']||'').split(',').filter(Boolean).map(p=>`<span class="tag tag-platform">${p.trim()}</span>`).join('')}
+        ${(g.Multiplayer||'').split(',').filter(Boolean).map(m=>`<span class="tag tag-multi">${m.trim()}</span>`).join('')}
+      </div>
+      <span class="install-badge ${installClass(g['Install Status'])}" style="font-size:0.75rem;">${g['Install Status'] || 'Unknown'}</span>
+    </div>`;
+
+  const enjoyBar = !isNaN(enjoy)
+    ? `<div class="enjoyment-bar"><div class="enjoyment-track"><div class="enjoyment-fill" style="width:${enjoy*10}%"></div></div><span class="enjoyment-num">${enjoy}/10</span></div>`
+    : '<span style="color:var(--text-dim)">N/A</span>';
+
+  const sizeVal = sizeFormatted
+    ? `<span style="color:${sizeColor}">${sizeFormatted}</span>`
+    : '—';
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="detail-label">Owned By</div>
+        <div class="detail-value">${g.Ownership || '—'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Players</div>
+        <div class="detail-value">${g['Player(s)'] || '—'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Enjoyment</div>
+        <div class="detail-value">${enjoyBar}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Size</div>
+        <div class="detail-value">${sizeVal}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Steam ID</div>
+        <div class="detail-value">${g['Steam ID'] && g['Steam ID'] !== 'N/A' ? `<a href="https://store.steampowered.com/app/${g['Steam ID']}" target="_blank" style="color:var(--accent)">${g['Steam ID']} ↗</a>` : '—'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Last Activity</div>
+        <div class="detail-value" style="font-size:0.78rem;color:var(--text-dim)">${g['Last Installed/Uninstalled'] || '—'}</div>
+      </div>
+    </div>
+    ${g.Notes ? `<div class="notes-box" style="white-space:pre-line">📝 ${g.Notes}</div>` : ''}`;
+
+  document.getElementById('modalBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── Events ───────────────────────────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('filterOwner').addEventListener('change', applyFilters);
+document.getElementById('filterMulti').addEventListener('change', applyFilters);
+document.getElementById('filterPlatform').addEventListener('change', applyFilters);
+document.getElementById('filterInstall').addEventListener('change', applyFilters);
+document.getElementById('filterEnjoyMin').addEventListener('input', applyFilters);
+document.getElementById('filterEnjoyMax').addEventListener('input', applyFilters);
+document.getElementById('filterSizeMax').addEventListener('input', applyFilters);
+document.getElementById('filterPlayer').addEventListener('change', applyFilters);
+document.getElementById('sortBy').addEventListener('change', e => { sortField = e.target.value; applyFilters(); });
+
+document.getElementById('sortDirBtn').addEventListener('click', () => {
+  sortDir *= -1;
+  document.getElementById('sortDirBtn').textContent = sortDir === 1 ? '↑' : '↓';
+  applyFilters();
+});
+
+document.getElementById('clearFilters').addEventListener('click', () => {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('filterOwner').value = '';
+  document.getElementById('filterMulti').value = '';
+  document.getElementById('filterPlatform').value = '';
+  document.getElementById('filterInstall').value = '';
+  document.getElementById('filterEnjoyMin').value = '';
+  document.getElementById('filterEnjoyMax').value = '';
+  document.getElementById('filterSizeMax').value = '';
+  document.getElementById('filterPlayer').value = '';
+  document.getElementById('sortBy').value = 'title';
+  sortField = 'title';
+  sortDir = 1;
+  document.getElementById('sortDirBtn').textContent = '↑';
+  applyFilters();
+});
+
+document.getElementById('filtersToggle').addEventListener('click', () => {
+  const grid = document.getElementById('filtersGrid');
+  const btn = document.getElementById('filtersToggle');
+  grid.classList.toggle('open');
+  btn.classList.toggle('open');
+});
+
+document.getElementById('gridViewBtn').addEventListener('click', () => {
+  viewMode = 'grid';
+  document.getElementById('gridViewBtn').classList.add('active');
+  document.getElementById('listViewBtn').classList.remove('active');
+  document.getElementById('gamesGrid').classList.add('active');
+  document.getElementById('gamesList').classList.remove('active');
+});
+
+document.getElementById('listViewBtn').addEventListener('click', () => {
+  viewMode = 'list';
+  document.getElementById('listViewBtn').classList.add('active');
+  document.getElementById('gridViewBtn').classList.remove('active');
+  document.getElementById('gamesList').classList.add('active');
+  document.getElementById('gamesGrid').classList.remove('active');
+});
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalBackdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalBackdrop')) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// List header sorting
+document.querySelectorAll('.col-sortable').forEach(col => {
+  col.addEventListener('click', () => {
+    const field = col.dataset.sort;
+    if (field) { sortField = field; document.getElementById('sortBy').value = field; applyFilters(); }
+  });
+});
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+loadGames();
+</script>
+</body>
+</html>
