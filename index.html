@@ -380,7 +380,7 @@
 
   .card-title {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 0.95rem;
+    font-size: 1.02rem;
     font-weight: 600;
     line-height: 1.2;
     color: #fff;
@@ -433,6 +433,26 @@
   .card-image-wrapper {
     position: relative;
   }
+
+/* AFTER: */
+.platform-badge-overlay {
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.platform-badge-icon {
+  font-size: 0.84rem;
+  padding: 3px 6px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.15);
+  line-height: 1.2;
+}
 
   .size-badge-overlay {
     position: absolute;
@@ -1196,6 +1216,27 @@ function getImg(g) {
   return url;
 }
 
+function getPlatformBadge(platformStr) {
+  const platform = (platformStr || '').split(',')[0].trim();
+  const map = {
+    '52 Deck of Cards': { color: '#ffffff', icon: '♣️' },
+    'Android':          { color: '#4caf50', icon: '🤖' },
+    'Battle Net':       { color: '#00bcd4', icon: '🧝' },
+    'Board Game':       { color: '#1a237e', icon: '♟️' },
+    'Card Game':        { color: '#ffca28', icon: '🎴' },
+    'EA':               { color: '#ff6d00', icon: '⚽' },
+    'Epic Games':       { color: '#9e9e9e', icon: '💥' },
+    'Mobile':              { color: '#ffca28', icon: '📱' },
+    'PC':               { color: '#e53935', icon: '💻' },
+    'Playstation':      { color: '#1565c0', icon: '🟦' },
+    'Steam':            { color: '#424242', icon: '⚙️' },
+    'Uplay':            { color: '#1e88e5', icon: '🗡️' },
+    'Web Browser':      { color: '#4fc3f7', icon: '🌐' },
+    'Xbox':             { color: '#388e3c', icon: '🟩' },
+  };
+  return map[platform] || null;
+}
+
 function renderGrid() {
   const grid = document.getElementById('gamesGrid');
   grid.innerHTML = '';
@@ -1235,13 +1276,24 @@ function renderGrid() {
       ? `<span class="enjoyment-num-badge" style="color:${enjoyColor}">${enjoy}</span>`
       : '';
 
-    const sizeOverlay = sizeFormatted && sizeColor
-      ? `<span class="size-badge-overlay" style="color:${sizeColor}">${sizeFormatted}</span>`
-      : '';
+  const sizeOverlay = sizeFormatted && sizeColor
+    ? `<span class="size-badge-overlay" style="color:${sizeColor}">${sizeFormatted}</span>`
+    : '';
+
+// AFTER:
+const platformIcons = platforms
+  .map(p => getPlatformBadge(p))
+  .filter(Boolean)
+  .map(b => `<span class="platform-badge-icon" style="background:${b.color}49">${b.icon}</span>`)
+  .join('');
+const platformOverlay = platformIcons
+  ? `<div class="platform-badge-overlay">${platformIcons}</div>`
+  : '';
 
     card.innerHTML = `
       <div class="card-image-wrapper">
         ${imgHtml}
+        ${platformOverlay}
         ${sizeOverlay}
       </div>
       <div class="card-body">
@@ -1442,4 +1494,5 @@ document.querySelectorAll('.col-sortable').forEach(col => {
 loadGames();
 </script>
 </body>
+
 </html>
